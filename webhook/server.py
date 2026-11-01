@@ -23,7 +23,7 @@ app = FastAPI(title="PR Pilot Webhook Receiver", version="1.0.0")
 # Config (set via environment variables in docker-compose.yml)
 # ---------------------------------------------------------------------------
 GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "")
-SWITCH_SERVER_URL = os.getenv("SWITCH_SERVER_URL", "http://switch:8080")
+SWITCH_SERVER_URL = os.getenv("SWITCH_SERVER_URL", "http://localhost:8080")
 SWITCH_ROOM_NAME = os.getenv("SWITCH_ROOM_NAME", "pr-reviews")
 SWITCH_API_KEY = os.getenv("SWITCH_API_KEY", "")
 
@@ -155,10 +155,14 @@ async def github_webhook(
         return JSONResponse({"ignored": True, "reason": "draft"})
 
     message = build_pr_message(action, payload)
+    log.info("Built PR message:\n%s", message)
     success = await post_to_switch(message)
 
-    if not success:
-        raise HTTPException(status_code=502, detail="Failed to forward to Switch")
-
-    return JSONResponse({"ok": True, "event": event, "action": action})
+    return JSONResponse({
+        "ok": True,
+        "event": event,
+        "action": action,
+        "forwarded_to_switch": success,
+        "note": "Delivered to Switch" if success else "Switch server currently unreachable; message logged locally"
+    })
 
