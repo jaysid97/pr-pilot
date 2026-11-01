@@ -1,0 +1,53 @@
+version: "3.9"
+
+# PR Pilot — docker-compose
+# Runs the GitHub webhook receiver alongside Switch.
+# Switch Console manages the Switch server itself; this file
+# adds the webhook service that bridges GitHub → Switch.
+
+services:
+
+  # ──────────────────────────────────────────────────────────
+  # GitHub Webhook Receiver
+  # Listens for PR events from GitHub and forwards them to
+  # the Switch server as room messages.
+  # ──────────────────────────────────────────────────────────
+  webhook:
+    build: ./webhook
+    container_name: pr-pilot-webhook
+    ports:
+      - "9000:9000"           # Exposed for ngrok / Cloudflare Tunnel
+    environment:
+      # GitHub webhook secret (set in your GitHub repo settings)
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+
+      # Where Switch is running (default: Switch Console default port)
+      SWITCH_SERVER_URL: ${SWITCH_SERVER_URL:-http://host.docker.internal:8080}
+
+      # The Switch room to post into
+      SWITCH_ROOM_NAME: ${SWITCH_ROOM_NAME:-pr-reviews}
+
+      # Optional: Switch API key if auth is enabled
+      SWITCH_API_KEY: ${SWITCH_API_KEY:-}
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:9000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ──────────────────────────────────────────────────────────
+  # Cloudflare Tunnel (optional, for public webhook URL)
+  # Uncomment if you don't want to use ngrok.
+  # Gives you a stable public HTTPS URL for the GitHub webhook.
+  # ──────────────────────────────────────────────────────────
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+  #   depends_on:
+  #     - webhook
+  #   restart: unless-stopped
+
