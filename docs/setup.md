@@ -23,7 +23,7 @@ Estimated time: **15–20 minutes**.
 ## Step 1: Clone the repo
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/pr-pilot.git
+git clone https://github.com/jaysid97/pr-pilot.git
 cd pr-pilot
 ```
 

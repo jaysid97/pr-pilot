@@ -52,7 +52,7 @@ Switch is the infrastructure that makes this possible. Remove Switch and the age
 ### 1 — Clone & configure
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/pr-pilot
+git clone https://github.com/jaysid97/pr-pilot
 cd pr-pilot
 cp .env.example .env
 ```

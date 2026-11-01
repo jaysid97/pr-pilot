@@ -76,7 +76,7 @@
 
 **[Screen: GitHub repo URL]**
 
-> *"Check it out: github.com/YOUR_USERNAME/pr-pilot"*
+> *"Check it out: github.com/jaysid97/pr-pilot"*
 
 ---
 
